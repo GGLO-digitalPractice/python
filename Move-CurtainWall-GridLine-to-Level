@@ -1,0 +1,57 @@
+import clr
+
+clr.AddReference('RevitAPI')
+from Autodesk.Revit.DB import *
+from Autodesk.Revit.DB.Structure import *
+
+clr.AddReference('RevitAPIUI')
+from Autodesk.Revit.UI import *
+
+clr.AddReference('System')
+from System.Collections.Generic import List
+
+clr.AddReference('RevitNodes')
+import Revit
+clr.ImportExtensions(Revit.GeometryConversion)
+clr.ImportExtensions(Revit.Elements)
+
+clr.AddReference('RevitServices')
+from RevitServices.Persistence import DocumentManager
+from RevitServices.Transactions import TransactionManager
+
+clr.AddReference('ProtoGeometry')
+from Autodesk.DesignScript.Geometry import *
+
+doc = DocumentManager.Instance.CurrentDBDocument
+uidoc=DocumentManager.Instance.CurrentUIApplication.ActiveUIDocument
+
+# The inputs to this node will be stored as a list in the IN variables.
+uGrids = UnwrapElement(IN[0])
+levelPts = IN[1]
+crv = []
+startPtZ = []
+firstPoint = []
+vec = []
+n = 0
+e = []
+
+# Place your code below this line
+
+for ug in uGrids:
+	crv.append(ug.FullCurve.ToProtoType())
+	startPtZ.append(crv[n].StartPoint.Z)
+	firstPoint.append(crv[n].ClosestPointTo(levelPts[n]))
+	vec = Vector.ByTwoPoints(firstPoint[n], levelPts[n])
+	try:
+		TransactionManager.Instance.EnsureInTransaction(doc)
+		ug.Location.Move(vec.ToRevitType())
+		TransactionManager.Instance.TransactionTaskDone()
+	except:
+		e.append(Exception)
+	n += 1
+	if n >= len(levelPts):
+		break
+	else:
+		continue
+# Assign your output to the OUT variable.
+OUT = crv, startPtZ, levelPts, firstPoint, e

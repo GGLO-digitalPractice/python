@@ -1,0 +1,17 @@
+import clr
+clr.AddReference('System.Core')
+clr.AddReference('RhinoInside.Revit')
+clr.AddReference('RevitAPI')
+clr.AddReference('RevitAPIUI')
+
+from System import Enum, Action
+
+import rhinoscriptsyntax as rs
+import Rhino
+import RhinoInside
+import Grasshopper
+from RhinoInside.Revit import Revit, Convert
+from Autodesk.Revit import DB
+
+#access the active document object
+doc = Revit.ActiveDBDocument
